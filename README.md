@@ -65,4 +65,7 @@ flux bootstrap github \
   --personal
 
 3- writng ingress-controller 
+HelmRepository CRDs are always created in some namespace.
+By convention, we put all our Flux “sources” (GitRepositories, HelmRepositories, Buckets) in flux-system, so Flux controllers know where to find them.flux-system namespace → holds Flux plumbing + source definitions (Git/Helm repos).targetNamespace (e.g. ingress-nginx, default, monitoring) → where actual apps run.It keeps GitOps infra config separate from workloads, which is considered a best practice.
+
 flux reconcile source git flux-system
