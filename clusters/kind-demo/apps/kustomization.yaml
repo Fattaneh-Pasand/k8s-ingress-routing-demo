@@ -1,7 +1,0 @@
-kind: Kustomization
-resources:
-  - foo.yaml
-  - bar.yaml
-  - ingress.yaml
-  
-
