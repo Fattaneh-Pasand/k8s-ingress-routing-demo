@@ -63,3 +63,6 @@ flux bootstrap github \
   --branch=master\
   --path=clusters/kind-demo \
   --personal
+
+3- writng ingress-controller 
+flux reconcile source git flux-system
