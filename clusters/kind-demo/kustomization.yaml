@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - ./flux-system
   - ./infra/ingress-nginx
-  #- ./echo-kustomization.yaml
+  - ../../apps

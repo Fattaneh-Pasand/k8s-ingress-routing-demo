@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: echo-routes
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      
+      - path: /foo
+        pathType: Prefix
+        backend:
+          service:
+            name: echo-foo-svc
+            port:
+              number: 80
+      
+      - path: /bar
+        pathType: Prefix
+        backend:
+          service:
+            name: echo-bar-svc
+            port:
+              number: 80
