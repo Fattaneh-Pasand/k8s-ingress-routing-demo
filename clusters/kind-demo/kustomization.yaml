@@ -1,8 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ../../flux-system/gotk-components.yaml
-  - ../../flux-system/gotk-sync.yaml
-  - ../../infra/ingress-nginx/helm-repo.yaml
-  - ../../infra/ingress-nginx/helm-release.yaml
+  - ./flux-system/gotk-components.yaml
+  - .flux-system/gotk-sync.yaml
+  - ./flux-system/kustomization.yaml
+  - ./infra/ingress-nginx/helm-repo.yaml
+  - ./infra/ingress-nginx/helm-release.yaml
   #- ./echo-kustomization.yaml
