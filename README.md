@@ -71,12 +71,6 @@ Both foo and bar run multiple replicas.
 
 Kubernetes distributes incoming requests across replicas automatically.
 
-6. Security & Best Practices (Optional Extensions)
-
-TLS termination with cert-manager (self-signed or ACM).
-
-Secrets injection into pods (e.g., API_KEY).
-
 Namespace separation for clean management:
 
 flux-system → Flux controllers & sources.
