@@ -20,7 +20,7 @@ spec:
   values:
     controller:
       hostPort:
-        enabled: true      # make it reachable on kind via node ports/hostPort
+        enabled: true      
       service:
         type: NodePort
       ingressClassResource:

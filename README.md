@@ -1,80 +1,155 @@
-# Scenario description
+## 📘 Kubernetes Ingress Routing Demo with Flux & Kind
+# 🔹 Overview
 
-In this project, I simulate a production-like Kubernetes setup on my local machine using kind.
-The goal is to demonstrate how to expose multiple microservices behind a single entrypoint (Ingress), scale them, and keep the configuration clean and secure — just like in a real AWS EKS or GKE environment.
+This project simulates a production-like Kubernetes setup on a local machine using kind.
 
-.
+The goal is to demonstrate how to:
 
-# 🚀 What the project demonstrates
+Run multiple microservices (foo, bar) behind a single entrypoint (Ingress).
 
-1-Microservices
+Route all external traffic through the Ingress Controller.
 
-Two independent services (foo, bar) running as Deployments with 2 replicas each.
+Scale services and distribute traffic evenly across replicas.
 
-Each one returns different responses (“hello foo”, “hello bar”) to simulate different APIs.
+Manage configuration with Flux (GitOps) for automation and reliability.
 
-2-Service discovery & load balancing
+Map the setup to real-world cloud environments like AWS EKS, GKE, AKS.
 
-Each Deployment is exposed internally with a Kubernetes Service.
+# 🔹 Architecture
+1. Microservices
 
-Kubernetes load-balances requests across replicas.
+Two independent Deployments:
 
-3-Ingress routing
+foo → responds with "hello foo"
 
-An Ingress resource routes external requests:
+bar → responds with "hello bar"
 
-/foo → foo service
+Each Deployment runs 2 replicas for scalability.
 
-/bar → bar service
+2. Service Discovery & Load Balancing
 
-Implemented by the ingress-nginx controller, which acts like an API gateway.
+Each Deployment is exposed internally via a ClusterIP Service.
 
-4-Scalability
+Kubernetes Services handle load balancing across replicas.
 
-Each app runs multiple replicas.
+3. Ingress Controller (Single Entrypoint)
 
-Shows how Kubernetes distributes traffic evenly.
+An Ingress resource defines routing rules:
 
-5-Security & best practices (optional extension)
+/foo → forwards traffic to foo service
 
-(Optional) TLS with cert-manager/self-signed certificate.
+/bar → forwards traffic to bar service
 
-(Optional) Secrets injected into pods (API_KEY demo).
+Requests from outside the cluster always pass through the Ingress Controller (ingress-nginx).
 
-6-Cloud mapping
+Flow of traffic:
 
-Locally, ingress-nginx handles routing.
+Client → Ingress Controller → Service → Pod (replica)
 
-On AWS, the same Ingress YAML would be implemented by the AWS Load Balancer Controller, provisioning an Application Load Balancer with Route53 + ACM certificates.
 
-# steps:
+This simulates how cloud Load Balancers work in managed Kubernetes environments.
 
-1-create kind cluster
-kind create cluster --name demo-ingress --config apps/kind-cluster.yaml
+4. GitOps with Flux
 
-2- bootsrtap flux 
-When you run flux bootstrap, Flux installs itself and commits YAML manifests into your GitHub repo.
-The --path flag tells Flux where inside your repo to put those cluster configuration files.
-Those files describe Flux itself (controllers, sync config).
+Flux continuously watches a GitHub repository for manifests.
+
+When changes are pushed, Flux reconciles the cluster state with Git.
+
+Flux controllers used:
+
+Source Controller → fetches Git/Helm sources.
+
+Kustomize Controller → applies kustomizations.
+
+Helm Controller → manages Helm releases.
+
+Notification Controller → sends events (Slack, GitHub, etc).
+
+5. Scalability
+
+Both foo and bar run multiple replicas.
+
+Kubernetes distributes incoming requests across replicas automatically.
+
+6. Security & Best Practices (Optional Extensions)
+
+TLS termination with cert-manager (self-signed or ACM).
+
+Secrets injection into pods (e.g., API_KEY).
+
+Namespace separation for clean management:
+
+flux-system → Flux controllers & sources.
+
+ingress-nginx → ingress controller.
+
+default or other namespaces → applications.
+
+# 🔹 Setup & Steps
+1. Create Kind Cluster
+kind create cluster --name demo-ingress --config kind-cluster.yaml
+
+2. Bootstrap Flux
+
+Flux installs itself and commits manifests into GitHub.
 
 flux bootstrap github \
   --owner=Fattaneh-Pasand \
   --repository=k8s-ingress-routing-demo \
-  --branch=master\
+  --branch=master \
   --path=clusters/kind-demo \
   --personal
 
-3- writng ingress-controller 
-HelmRepository CRDs are always created in some namespace.
-By convention, we put all our Flux “sources” (GitRepositories, HelmRepositories, Buckets) in flux-system, so Flux controllers know where to find them.flux-system namespace → holds Flux plumbing + source definitions (Git/Helm repos).targetNamespace (e.g. ingress-nginx, default, monitoring) → where actual apps run.It keeps GitOps infra config separate from workloads, which is considered a best practice.
+
+--path → location in repo where cluster configuration lives.
+
+To force Flux reconciliation after pushing changes:
 
 flux reconcile source git flux-system
 
+3. Deploy Ingress Controller
 
+Define a HelmRepository in the flux-system namespace (for sources).
 
-In a Kustomization (kustomize) file, any resources: entry that is a folder must contain its own kustomization.yaml.
+Deploy ingress-nginx in the ingress-nginx namespace.
+
+Since kind does not provide a cloud LoadBalancer, expose the controller manually:
 
 kubectl -n ingress-nginx port-forward svc/ingress-nginx-controller 8080:80
 
 
-Kustomization lives in flux-system because it’s a Flux control object, not your app
+Now you can test routes:
+
+http://localhost:8080/foo → "hello foo"
+
+http://localhost:8080/bar → "hello bar"
+
+All external traffic flows through the ingress-nginx controller, which then routes requests internally.
+
+# 🔹 Cloud Mapping
+
+Local (kind): ingress-nginx acts as the entrypoint; traffic is exposed via port-forward.
+
+Cloud (AWS/GCP/Azure):
+
+The same Ingress manifest is used.
+
+The cloud provider’s Load Balancer Controller provisions:
+
+AWS → Application Load Balancer (ALB) with Route53 + ACM certificates.
+
+GCP → HTTP(S) Load Balancer.
+
+Azure → Application Gateway.
+
+This shows that GitOps + Ingress manifests are cloud-agnostic and portable.
+
+# 🔹 Project Highlights
+
+✅ Microservices (foo/bar) deployed with replicas
+✅ Routing and load balancing through Ingress Controller
+✅ GitOps workflow with Flux
+✅ Secure, production-like namespace separation
+✅ Same manifests run locally and in cloud (EKS, GKE, AKS)
+
+👉 This project demonstrates how Ingress + Flux + kind can be used to simulate a real-world production Kubernetes setup, where all external requests are routed through the Ingress Controller — just like in AWS, GCP, or Azure.
