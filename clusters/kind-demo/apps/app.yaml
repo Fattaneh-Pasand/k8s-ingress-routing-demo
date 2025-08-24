@@ -12,7 +12,7 @@ spec:
       containers:
       - name: echo
         image: hashicorp/http-echo
-        args: ["-text=hello foo"]
+        args: ["-text=Hello foo 🙂"]
         ports:
         - containerPort: 5678
 ---
@@ -40,7 +40,7 @@ spec:
       containers:
       - name: echo
         image: hashicorp/http-echo
-        args: ["-text=Hello foo"]
+        args: ["-text=Hello bar 🙂"]
         ports:
         - containerPort: 5678
 ---

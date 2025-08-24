@@ -73,3 +73,8 @@ flux reconcile source git flux-system
 
 
 In a Kustomization (kustomize) file, any resources: entry that is a folder must contain its own kustomization.yaml.
+
+kubectl -n ingress-nginx port-forward svc/ingress-nginx-controller 8080:80
+
+
+Kustomization lives in flux-system because it’s a Flux control object, not your app
