@@ -81,26 +81,29 @@ default or other namespaces → applications.
 
 # 🔹 Setup & Steps
 1. Create Kind Cluster
+```bash
 kind create cluster --name demo-ingress --config kind-cluster.yaml
+```
 
 2. Bootstrap Flux
 
 Flux installs itself and commits manifests into GitHub.
 
+```bash
 flux bootstrap github \
   --owner=Fattaneh-Pasand \
   --repository=k8s-ingress-routing-demo \
   --branch=master \
   --path=clusters/kind-demo \
   --personal
-
+```
 
 --path → location in repo where cluster configuration lives.
 
 To force Flux reconciliation after pushing changes:
-
+```bash
 flux reconcile source git flux-system
-
+```
 3. Deploy Ingress Controller
 
 Define a HelmRepository in the flux-system namespace (for sources).
@@ -108,15 +111,15 @@ Define a HelmRepository in the flux-system namespace (for sources).
 Deploy ingress-nginx in the ingress-nginx namespace.
 
 Since kind does not provide a cloud LoadBalancer, expose the controller manually:
-
+```bash
 kubectl -n ingress-nginx port-forward svc/ingress-nginx-controller 8080:80
-
+```
 
 Now you can test routes:
 
-http://localhost:8080/foo → "hello foo"
+http://localhost:8080/foo → "Hello foo 🙂"
 
-http://localhost:8080/bar → "hello bar"
+http://localhost:8080/bar → "Hello bar 🙂"
 
 All external traffic flows through the ingress-nginx controller, which then routes requests internally.
 
@@ -144,6 +147,6 @@ This shows that GitOps + Ingress manifests are cloud-agnostic and portable.
 ✅ Routing and load balancing through Ingress Controller
 ✅ GitOps workflow with Flux
 ✅ Secure, production-like namespace separation
-✅ Same manifests run locally and in cloud (EKS, GKE, AKS)
+
 
 👉 This project demonstrates how Ingress + Flux + kind can be used to simulate a real-world production Kubernetes setup, where all external requests are routed through the Ingress Controller — just like in AWS, GCP, or Azure.
